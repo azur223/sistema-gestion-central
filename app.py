@@ -1,28 +1,22 @@
 import streamlit as st
-import urllib.parse
 import pandas as pd
 import time
 
-# 1. Configuración del Centro de Inteligencia Colectiva
-st.set_page_config(page_title="Agente Global de Localización", layout="wide", page_icon="🕵️‍♂️")
+# Configuración de la pantalla
+st.set_page_config(page_title="Rastreador OSINT Real", layout="wide", page_icon="🕵️‍♂️")
 
-# Inicializar Base de Datos de Hallazgos Autónomos
-if "casos_desaparecidos" not in st.session_state:
-    st.session_state["casos_desaparecidos"] = []
-if "historial_ia" not in st.session_state:
-    st.session_state["historial_ia"] = [
-        {"role": "assistant", "content": "🤖 **Agente Autónomo de Búsqueda e Investigación Online.**\n\nEscribime el nombre o los datos de la persona. Activaré los protocolos de rastreo automático en la web profunda, redes sociales y registros de comunicación para localizar coincidencias."}
-    ]
+# Inicializar Base de Datos interna para guardar pistas reales
+if "pistas_reales" not in st.session_state:
+    st.session_state["pistas_reales"] = []
 
-# 2. Candado de Seguridad Privado
+# Sistema de Seguridad Privado
 if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
 
 if not st.session_state["autenticado"]:
-    st.title("🛡️ Unidad IA de Localización Internacional")
-    st.write("Acceso restringido. Sistema de rastreo de fuentes abiertas en tiempo real.")
-    
-    clave = st.text_input("Introduce la Clave de Acceso Central:", type="password")
+    st.title("🔐 Acceso al Sistema OSINT de Localización")
+    st.write("Introduce las credenciales de administrador para activar los rastreadores en vivo.")
+    clave = st.text_input("Clave de Acceso Central:", type="password")
     if st.button("Iniciar Sistema"):
         if clave == "control2026":
             st.session_state["autenticado"] = True
@@ -30,116 +24,96 @@ if not st.session_state["autenticado"]:
         else:
             st.error("Clave incorrecta.")
 
-# 3. Operación del Agente Autónomo
+# Panel de Control con Búsqueda Real
 else:
-    st.sidebar.title("📡 Estado de Red")
-    st.sidebar.write("Rastreadores Core: **Activos (4/4)** 🟢")
-    st.sidebar.write("Extracción de Datos: **Automática** ⚡")
+    st.sidebar.title("🕹️ Panel de Control")
+    st.sidebar.write("Estado del Bot: **Listo para Buscar** 🟢")
     
-    opcion = st.sidebar.radio(
-        "Secciones del Sistema:",
-        ["🕵️‍♂️ Rastreador IA Autónomo", "🗄️ Base de Datos e Informes", "⚙️ Conexión de Motores (APIs)"]
-    )
+    opcion = st.sidebar.radio("Selecciona una opción:", ["🔍 Rastreador Web Real", "🗄️ Pistas Guardadas"])
     
-    if st.sidebar.button("Apagar Sistema"):
+    if st.sidebar.button("Cerrar Sistema"):
         st.session_state["autenticado"] = False
         st.rerun()
 
-    # --- MÓDULO 1: RASTREADOR IA AUTÓNOMO ---
-    if opcion == "🕵️‍♂️ Rastreador IA Autónomo":
-        st.title("🕵️‍♂️ Rastreador de Personas Automatizado por IA")
-        st.write("Ingresá los datos del objetivo. La IA ejecutará los scripts de búsqueda autónoma en la web.")
+    # --- MÓDULO DE BÚSQUEDA REAL ---
+    if opcion == "🔍 Rastreador Web Real":
+        st.title("🕵️‍♂️ Buscador OSINT Automatizado en Internet")
+        st.write("Este módulo realiza consultas **reales y en vivo** en toda la web abierta (redes, noticias, alertas) usando el motor de indexación.")
 
-        # Historial de pantalla
-        for msg in st.session_state["historial_ia"]:
-            with st.chat_message(msg["role"]):
-                st.write(msg["content"])
+        # Cuadros de entrada de datos limpios
+        nombre_buscar = st.text_input("Nombre completo de la persona a localizar:").strip()
+        contexto_buscar = st.text_input("Datos adicionales obligatorios (Ej: país, ciudad, edad o año de desaparición):").strip()
 
-        # Input de orden de búsqueda
-        if orden := st.chat_input("Escribe aquí: Buscar a [Nombre], visto por última vez en [Lugar]..."):
-            st.session_state["historial_ia"].append({"role": "user", "content": orden})
-            
-            # Procesar el nombre de manera automática
-            palabras = orden.replace(",", " ").replace(".", " ").split()
-            exclusiones = ["buscar", "a", "desaparecido", "en", "el", "la", "por", "favor", "encuentra", "persona", "redes"]
-            filtrados = [p for p in palabras if p.lower() not in exclusiones and len(p) > 2]
-            nombre_detectado = " ".join(filtrados[:3]) if filtrados else "Objetivo Anónimo"
-            
-            # --- EFECTO DE RASTREO EN VIVO (Para control visual en el celular) ---
-            with st.chat_message("assistant"):
-                st.write("🔄 **Iniciando protocolo de búsqueda autónoma...**")
-                
-                # Barra de progreso real que simula el escaneo del Bot
-                with st.status("🕵️‍♂️ Ejecutando Agente Rastreador en la Web...", expanded=True) as status:
-                    st.write("🌐 Conectando con servidores de búsqueda indexada...")
-                    time.sleep(1.5)
-                    st.write("📸 Escaneando metadatos públicos en Facebook, Instagram y TikTok...")
-                    time.sleep(1.8)
-                    st.write("🐦 Analizando hilos temporales y menciones en X (Twitter)...")
-                    time.sleep(1.5)
-                    st.write("🗂️ Cruzando coincidencias con boletines oficiales y registros de ONGs...")
-                    time.sleep(1.2)
-                    status.update(label="🔍 ¡Rastreo e indexación completados!", state="complete")
+        if st.button("🚀 Lanzar Agente de Buesqueda en Internet"):
+            if nombre_buscar and contexto_buscar:
+                # Mostrar animación de que está trabajando de verdad
+                with st.spinner(f"El bot está navegando la web ahora mismo buscando coincidencias de '{nombre_buscar}'..."):
+                    try:
+                        # Llamamos a la herramienta de búsqueda real instalada
+                        from duckduckgo_search import DDGS
+                        
+                        # Construcción del comando de búsqueda inteligente cruzando los datos
+                        comando_busqueda = f'"{nombre_buscar}" {contexto_buscar} (desaparecido OR desaparecida OR missing OR busqueda)'
+                        
+                        # Ejecutar la consulta real en internet
+                        with DDGS() as ddgs:
+                            resultados_vivos = list(ddgs.text(comando_busqueda, max_results=8))
+                        
+                        if resultados_vivos:
+                            st.success(f"⚠️ ¡Rastreo Completo! Se detectaron {len(resultados_vivos)} publicaciones o páginas reales en internet:")
+                            
+                            # Mostrar cada resultado real extraído de internet
+                            for i, resultado in enumerate(resultados_vivos):
+                                titulo = resultado.get("title", "Página sin título")
+                                link = resultado.get("href", "#")
+                                fragmento = resultado.get("body", "No hay fragmento de texto disponible.")
+                                
+                                # Tarjeta visual para cada hallazgo
+                                with st.expander(f"📄 Coincidencia {i+1}: {titulo}"):
+                                    st.write(f"🔗 **Dirección de la página:** {link}")
+                                    st.write(f"📝 **Información hallada dentro de la web:** {fragmento}")
+                                    
+                                    # Guardar automáticamente este hallazgo en la base de datos
+                                    registro_pista = {
+                                        "Persona Buscada": nombre_buscar,
+                                        "Pista / Título de la Web": titulo,
+                                        "Texto Encontrado": fragmento,
+                                        "Enlace de la Fuente": link,
+                                        "Fecha del Hallazgo": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M")
+                                    }
+                                    # Evitar duplicados simples
+                                    if registro_pista not in st.session_state["pistas_reales"]:
+                                        st.session_state["pistas_reales"].append(registro_pista)
+                        else:
+                            st.warning("El bot recorrió internet pero no detectó ninguna página pública reciente que combine ese nombre exacto con las palabras de desaparición. Intenta afinando el nombre o quitando palabras del segundo cuadro.")
+                            
+                    except Exception as error_motor:
+                        st.error("Hubo un problema al conectar el buscador en vivo.")
+                        st.info("Asegúrate de haber completado el Paso 1 (crear el archivo requirements.txt en GitHub) y espera 1 minuto a que Streamlit se reinicie por completo.")
+                        st.caption(f"Detalle técnico del error: {error_motor}")
+            else:
+                st.warning("Por favor rellena tanto el Nombre como el Contexto (país/ciudad) para que la búsqueda sea precisa.")
 
-                # Generación automática del Dossier de Inteligencia
-                reporte_ia = f"""
-                📊 **DOSSIER DE LOCALIZACIÓN AUTOMÁTICO - IA AGENTE**
-                
-                * **Objetivo Identificado:** {nombre_detectado}
-                * **Estado del Rastreo:** Analizado / En Monitoreo Continuo
-                
-                📋 **Informe Antropomórfico y de Huella Digital Detectado:**
-                La IA ha procesado la red de comunicación abierta. Se han detectado patrones de coincidencia basados en tu solicitud: *"{orden}"*.
-                
-                1. **Filtro de Redes Sociales:** El rastreador aisló perfiles activos y menciones recientes con este nombre. (Se generó un paquete de indexación interno).
-                2. **Comunicaciones y Foros:** Se escanearon cadenas de búsqueda pública indexando registros locales de noticias y alertas de prensa de las últimas semanas.
-                3. **Acción Tomada:** El caso ha sido fichado de forma automática en el registro central para que el bot siga buscando actualizaciones cada 24 horas.
-                
-                📍 *Nota: Si deseas conectar los algoritmos avanzados de Google Deep Search o OpenAI para que lean el texto interno de páginas bloqueadas de forma directa, vincula tu clave de motor en la pestaña de ajustes de la izquierda.*
-                """
-                
-                # Guardar el hallazgo de forma automática en la base de datos sin que el usuario haga nada
-                nuevo_caso = {
-                    "Nombre de la Persona": nombre_detectado,
-                    "Estado": "Búsqueda Activa por IA",
-                    "Pistas / Historial": f"Rastreado automáticamente a raíz de la orden: '{orden}'",
-                    "Fecha del Escaneo": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M")
-                }
-                st.session_state["casos_desaparecidos"].append(nuevo_caso)
-                
-                # Guardar en el historial de chat y recargar
-                st.session_state["historial_ia"].append({"role": "assistant", "content": reporte_ia})
-                st.rerun()
-
-    # --- MÓDULO 2: BASE DE DATOS DE INFORMES ---
-    elif opcion == "🗄️ Base de Datos e Informes":
-        st.title("🗄️ Registro Centralizado de Personas Localizadas / En Rastreo")
-        st.write("Acá la IA guarda automáticamente a todas las personas que le ordenás buscar.")
+    # --- MÓDULO DE BASE DE DATOS DE INFORMES REALES ---
+    elif opcion == "🗄️ Pistas Guardadas":
+        st.title("🗄️ Repositorio de Información y Evidencias Reales")
+        st.write("Aquí se acumulan automáticamente los textos y enlaces reales que el bot rescató de internet durante tus búsquedas.")
         
-        if st.session_state["casos_desaparecidos"]:
-            df = pd.DataFrame(st.session_state["casos_desaparecidos"])
+        if st.session_state["pistas_reales"]:
+            df = pd.DataFrame(st.session_state["pistas_reales"])
             st.dataframe(df, use_container_width=True)
             
-            # Descargar reporte directo al celu
+            # Botón para descargar el reporte real al celular
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button(
-                label="📥 Descargar Reporte de Inteligencia (CSV)",
+                label="📥 Guardar Reporte OSINT en el Celular (CSV)",
                 data=csv,
-                file_name="ia_localizacion_reporte.csv",
+                file_name="evidencias_localizacion_osint.csv",
                 mime="text/csv",
             )
             
-            if st.button("🗑️ Limpiar Registros"):
-                st.session_state["casos_desaparecidos"] = []
+            if st.button("🗑️ Vaciar evidencias"):
+                st.session_state["pistas_reales"] = []
                 st.rerun()
         else:
-            st.info("El bot no ha realizado ningún rastreo autónomo todavía. Dale una orden en la primera pestaña.")
-
-    # --- MÓDULO 3: CONFIGURACIÓN DE APIS REALES ---
-    elif opcion == "⚙️ Conexión de Motores (APIs)":
-        st.title("⚙️ Conexión de Motores de Búsqueda Profunda")
-        st.write("Para que la IA no solo simule y estructure los datos, sino que rompa los bloqueos de Google o las APIs de Meta de forma real, debés pegar tus llaves de conexión privadas aquí abajo:")
-        
-        st.text_input("Google Custom Search API Key:", type="password", help="Permite a la IA leer textos de cualquier web del mundo.")
-        st.text_input("Meta Developer Token (Facebook/Instagram):", type="password", help="Permite al bot saltarse restricciones de perfiles privados.")
-        st.button("💾 Guardar Conexiones de Motores")
+            st.info("La base de datos está limpia. Las pistas reales aparecerán aquí una vez que el bot intercepte datos en la web.")
