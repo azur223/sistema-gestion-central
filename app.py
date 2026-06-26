@@ -1,10 +1,15 @@
 import streamlit as st
 import urllib.parse
+import pandas as pd
 
 # 1. Configuración de pantalla
 st.set_page_config(page_title="Centro de Inteligencia", layout="wide", page_icon="🔐")
 
-# 2. Sistema de Seguridad (Contraseña Privada)
+# Inicializar la base de datos en memoria si no existe
+if "registro_objetivos" not in st.session_state:
+    st.session_state["registro_objetivos"] = []
+
+# 2. Sistema de Seguridad
 if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
 
@@ -23,7 +28,7 @@ if not st.session_state["autenticado"]:
         else:
             st.error("Clave incorrecta.")
 
-# 3. Panel de Control Principal (Autenticado)
+# 3. Panel de Control Principal
 else:
     st.sidebar.title("🕹️ Panel de Control")
     st.sidebar.write("Estado: **En línea** 🟢")
@@ -43,57 +48,69 @@ else:
         st.info("Bienvenido. Todos los sistemas listos para la integración externa.")
         
         col1, col2, col3 = st.columns(3)
-        col1.metric(label="Conexiones Externas", value="Redes Listas")
-        col2.metric(label="Bases de datos", value="Conectada")
+        col1.metric(label="Registros Guardados", value=len(st.session_state["registro_objetivos"]))
+        col2.metric(label="Bases de datos", value="Conectada (Local)")
         col3.metric(label="Entorno", value="100% Privado")
 
-    # --- MÓDULO DE REDES SOCIALES (NUEVO) ---
+    # --- MÓDULO DE REDES SOCIALES ---
     elif opcion == "Módulo Redes (OSINT)":
         st.title("🔍 Central de Consultas y Conexión de Redes")
         st.write("Introduce un nombre de usuario, término o alias para generar las pasarelas de acceso directo.")
 
-        # Entrada de datos limpia
-        target = st.text_input("Nombre de usuario u objetivo a verificar (Ej: nombreusuario):").strip()
+        target = st.text_input("Nombre de usuario u objetivo a verificar:").strip()
 
         if target:
-            # Codificar el texto para que sea seguro en URLs de navegación
             target_encoded = urllib.parse.quote(target)
             
             st.subheader("🔗 Pasarelas de Acceso Directo")
-            st.write("Selecciona la plataforma a la que deseas redirigir la consulta:")
-
-            # Creación de columnas con botones de redirección integrados
             c1, c2, c3 = st.columns(3)
-            
             with c1:
                 st.info("🌐 Facebook")
-                url_fb = f"https://www.facebook.com/search/top/?q={target_encoded}"
-                st.link_button("Buscar en Facebook", url_fb)
-
+                st.link_button("Buscar en Facebook", f"https://www.facebook.com/search/top/?q={target_encoded}")
             with c2:
                 st.success("📸 Instagram")
-                # Si es un nombre de usuario, va directo al perfil, si no, busca la etiqueta
-                url_ig = f"https://www.instagram.com/{target_encoded}/"
-                st.link_button("Ver Perfil/Tag IG", url_ig)
-
+                st.link_button("Ver Perfil/Tag IG", f"https://www.instagram.com/{target_encoded}/")
             with c3:
                 st.error("🐦 X / Twitter")
-                url_tw = f"https://x.com/search?q={target_encoded}"
-                st.link_button("Buscar en X (Twitter)", url_tw)
+                st.link_button("Buscar en X (Twitter)", f"https://x.com/search?q={target_encoded}")
 
             st.write("---")
-            st.subheader("🛠️ Estado de Conexión de APIs Oficiales")
-            st.caption("Para extracción automatizada de métricas masivas en tiempo real.")
-            st.checkbox("Habilitar pasarela para Graph API (Facebook/Instagram)", value=False)
-            st.checkbox("Habilitar pasarela para X Developer API", value=False)
+            st.subheader("📝 Registrar Hallazgo")
+            nota = st.text_area("Añade notas o detalles sobre este objetivo:")
+            categoria = st.selectbox("Categoría:", ["Investigación Activa", "Sospechoso", "Validado", "Archivo"])
+            
+            if st.button("💾 Guardar en Base de Datos"):
+                nuevo_registro = {
+                    "Objetivo/Usuario": target,
+                    "Categoría": categoria,
+                    "Notas/Hallazgos": nota if nota else "Sin notas adicionales",
+                    "Fecha de Registro": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M")
+                }
+                st.session_state["registro_objetivos"].append(nuevo_registro)
+                st.success(f"¡Objetivo '{target}' registrado con éxito!")
         else:
             st.warning("Escribe un nombre de usuario o palabra clave arriba para activar los accesos.")
 
-    # --- OTROS MÓDULOS ---
+    # --- MÓDULO BASE DE DATOS (NUEVO Y FUNCIONAL) ---
     elif opcion == "Base de Datos":
         st.title("🗄️ Gestión de Datos Internos")
-        st.write("Registro de logs y almacenamiento local de consultas.")
+        st.write("Aquí puedes revisar, filtrar y descargar los reportes guardados durante la sesión.")
+        
+        if st.session_state["registro_objetivos"]:
+            # Convertir la lista en un cuadro de datos visual (DataFrame)
+            df = pd.DataFrame(st.session_state["registro_objetivos"])
+            
+            # Mostrar la tabla interactiva
+            st.dataframe(df, use_container_width=True)
+            
+            # Botón para borrar el historial si lo deseas
+            if st.button("🗑️ Limpiar Base de Datos"):
+                st.session_state["registro_objetivos"] = []
+                st.success("Base de datos despejada.")
+                st.rerun()
+        else:
+            st.info("La base de datos está vacía. Registra objetivos desde el 'Módulo Redes (OSINT)'.")
         
     elif opcion == "Configuración":
         st.title("⚙️ Ajustes del Sistema")
-        st.write("Aquí se configuran los tokens de acceso privados una vez obtenidos de los paneles de desarrollador.")
+        st.write("Módulo de configuración avanzada.")
